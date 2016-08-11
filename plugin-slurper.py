@@ -40,7 +40,9 @@ class bcolors:
 print bcolors.FAIL + "" + bcolors.ENDC
 print bcolors.FAIL + bcolors.BOLD + "WordPress Plugin Slurp v." + slurp_version + bcolors.ENDC
 print bcolors.FAIL + "Slurp all the plugins from the WordPress Repository" + bcolors.ENDC
-print bcolors.FAIL + "This software is beta and should only be used as a tool for plugin moderators and administrators." + bcolors.ENDC
+print bcolors.FAIL + "Contribute to the project at https://github.com/justingreerbbi/plugin-slurper/" + bcolors.ENDC
+print bcolors.FAIL + "Please report all bugs and issues at https://github.com/justingreerbbi/plugin-slurper/issues" + bcolors.ENDC
+print bcolors.FAIL + "" + bcolors.ENDC
 print ""
 
 #
@@ -57,6 +59,9 @@ if os.path.isfile(".partial"):
 			shutil.rmtree("plugins")
 		if os.path.isfile(".revision"):
 			os.remove(".revision")
+	elif user_input.lower() == 'yes':
+		partial = open(".partial", "r")
+		start = int(partial.read())
 
 #
 # DEPENDANT THINGYS

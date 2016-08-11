@@ -1,5 +1,5 @@
-WordPress Plugin Directory Slurper
-==================================
+WordPress Plugin Slurper
+========================
 
 A command line Python 2.X script that downloads and updates a copy of the latest stable
 version of every plugin in the WordPress repo.

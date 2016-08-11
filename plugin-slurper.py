@@ -22,8 +22,10 @@ import shutil
 
 slurp_version = "1.0.0"
 
-local_revision = False;
-
+last_revision = False;
+plugins = False
+total_plugin_count = 0
+start = 0
 
 class bcolors:
     HEADER = '\033[95m'
@@ -72,69 +74,70 @@ svn_last_revision = re.search("\[([0-9]+)\]", content)
 
 if svn_last_revision:
 	print "Remote at " + bcolors.BOLD + svn_last_revision.group(1).strip() + bcolors.ENDC
-
-	# Check to see if there is a local copy of the plugin repository already
-	if os.path.isfile(".revision"):
-		f = open(".revision")
-		f_text = f.read()
-		rev = re.search("\[([0-9]+)\]", f_text)
-		if rev: 
-			last_revision = rev.group(1)
-
-			# Only stop if the rev numbers both match
-			if int(local_revision) >= int(svn_last_revision.group(1)):
-				print bcolors.OKGREEN + bcolors.BOLD + "You are up-to-date" + bcolors.ENDC + bcolors.ENDC
-				print ""
-				#sys.exit()
-			else:
-				print "Local at " + bcolors.BOLD + last_revision + bcolors.ENDC + " (out-dated)"
-				print "" 
-
-		else:
-			last_revision = False
-			print "No local revision found."
-
-	else:
-
-		# Create a data file with the revision
-		rev_file = open(".revision", "w")
-		rev_file.write( svn_last_revision.group(0))
-		rev_file.close();
-		
-		last_revision = False
-		print "No local revision found. Sit tight because this could take a while"
-		print ""
-
 else:
 	print "Could not determine remote revision. Perhaps the server is down?"
 
-#
-# GET THE PLUGIN LIST
-# 
-#print ""
-print "Retrieving plugin SVN plugin list... Please wait."
-plugin_url = urllib.urlopen("http://svn.wp-plugins.org");
-plugin_list = plugin_url.read()
-plugins = re.findall('<li><a href="(.+)">(.+)</a></li>', plugin_list)
 
-# Get Count of the list so that we can track progress
-# TODO: This is too excessive. We should not be calling the server twice.
-total_plugin_count = re.subn('<li><a href="(.+)">(.+)</a></li>',"", plugin_list)[1]
-current_plugin_count = 1
+# IF THERE IS A REVISION
+# - CHECK IF IT MATCHED THE REMOTE
+# - IF THE REVISON DOES NOT MATCH THE REMOTE THEN GET THE DIFF IN VERSION NUMBERS
+if os.path.isfile(".revision"):
+	f = open(".revision")
+	f_text = f.read()
+	rev = re.search("\[([0-9]+)\]", f_text)
+	last_revision = rev.group(1)
 
-# CHECK IF THERE IS A PARTIAL DOWNLOAD DONE
-start = 0
-if os.path.isfile(".partial"):
-	f = open(".partial", "r")
-	start = int(f.read())
-	print "Resuming at " + plugins[start][0]
+	# Only stop if the rev numbers both match
+	if int(last_revision) == int(svn_last_revision.group(1)):
+		print bcolors.OKGREEN + bcolors.BOLD + "You are up-to-date" + bcolors.ENDC + bcolors.ENDC
+		print ""
+	else:
+		print "Local at " + bcolors.BOLD + last_revision + bcolors.ENDC + " (out-dated)"
+		print "" 
+		print "Retrieving changelog... Please wait."
+
+		svn_diff = int(svn_last_revision.group(1)) - int(last_revision)
+		svn_changelog_url = "http://plugins.trac.wordpress.org/log/?verbose=on&mode=follow_copy&format=changelog&rev="+str(svn_last_revision.group(1))+"&limit="+str(svn_diff)
+
+		changelog_content = urllib.urlopen(svn_changelog_url)
+		changelog_content = changelog_content.read()
+		plugins = re.findall('\s*\* ([^/A-Z ]+)', changelog_content)
+
+		global plugins, total_plugin_count
+		plugins = list(set(plugins))
+		total_plugin_count = len(plugins)
+
+else:
+	rev_file = open(".revision", "w+")
+	rev_file.write(svn_last_revision.group(0))
+	rev_file.close();
+	
+	print "No local revision found. Sit tight because this could take a while."
 	print ""
 
+	plugin_url = urllib.urlopen("http://svn.wp-plugins.org");
+	plugin_list = plugin_url.read()
 
-#print plugin_count 
+	global plguins, total_plugin_count
+	plugins = re.findall('<li><a href="(.+)">(.+)</a></li>', plugin_list)
+	total_plugin_count = len(plugins)
+
+
+
+#
+# GET THE REQUIRED PLUGIN LIST
+# 
 for x in range( start, total_plugin_count):
+
+	# TEMP FIX FOR ARRAY OR NO ARRAY
+	try:
+		plugins[x][1]
+	except IndexError:
+		plugins[x][1] = plugins[x]
+
 	rev_file = open(".partial", "w+")
 	rev_file.write( str( x ) )
+	rev_file.close()
 
 	# FEEBACK
 	print "Updating " + plugins[x][1].rstrip("/")
@@ -158,6 +161,9 @@ for x in range( start, total_plugin_count):
 	# CLEANUP
 	os.remove( local_zip )
 
-rev_file.close()
-os.remove(".partial")
+if os.path.isfile(".partial"):
+	os.remove(".partial")
+
+# SCRIPT IS COMPLETE
+print bcolors.BOLD + "Plugin Slurp Complete" + bcolors.ENDC
 sys.exit()

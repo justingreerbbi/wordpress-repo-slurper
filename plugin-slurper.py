@@ -55,6 +55,8 @@ if os.path.isfile(".partial"):
 		os.remove(".partial")
 		if os.path.isdir("plugins"):
 			shutil.rmtree("plugins")
+		if os.path.isfile(".revision"):
+			os.remove(".revision")
 
 #
 # DEPENDANT THINGYS
@@ -118,8 +120,8 @@ else:
 	plugin_url = urllib.urlopen("http://svn.wp-plugins.org");
 	plugin_list = plugin_url.read()
 
-	global plguins, total_plugin_count
-	plugins = re.findall('<li><a href="(.+)">(.+)</a></li>', plugin_list)
+	global plugins, total_plugin_count
+	plugins = re.findall('<li><a href="(.+)">', plugin_list)
 	total_plugin_count = len(plugins)
 
 
@@ -129,25 +131,19 @@ else:
 # 
 for x in range( start, total_plugin_count):
 
-	# TEMP FIX FOR ARRAY OR NO ARRAY
-	try:
-		plugins[x][1]
-	except IndexError:
-		plugins[x][1] = plugins[x]
-
 	rev_file = open(".partial", "w+")
 	rev_file.write( str( x ) )
 	rev_file.close()
 
 	# FEEBACK
-	print "Updating " + plugins[x][1].rstrip("/")
+	print "Updating " + plugins[x].rstrip("/")
  
 	# SETUP
-	local_zip = "plugins/" + plugins[x][1].rstrip("/") + ".zip"
+	local_zip = "plugins/" + plugins[x].rstrip("/") + ".zip"
 	local_dir = "plugins"
 
 	# DOWNLAOD
-	plugin_zip_url = "http://downloads.wordpress.org/plugin/"+plugins[x][1].rstrip("/")+".latest-stable.zip?nostats=1"
+	plugin_zip_url = "http://downloads.wordpress.org/plugin/"+plugins[x].rstrip("/")+".latest-stable.zip?nostats=1"
 	urllib.urlretrieve( plugin_zip_url, local_zip )
 
 	# UNPACK
@@ -156,7 +152,7 @@ for x in range( start, total_plugin_count):
 		zip_ref.extractall( local_dir )
 		zip_ref.close()
 	else:
-		print bcolors.FAIL + "Update Failed for " + plugins[x][1].rstrip("/") +  bcolors.ENDC
+		print bcolors.FAIL + "Update Failed for " + plugins[x].rstrip("/") +  bcolors.ENDC
 
 	# CLEANUP
 	os.remove( local_zip )
@@ -166,4 +162,5 @@ if os.path.isfile(".partial"):
 
 # SCRIPT IS COMPLETE
 print bcolors.BOLD + "Plugin Slurp Complete" + bcolors.ENDC
+print ""
 sys.exit()

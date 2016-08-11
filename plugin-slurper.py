@@ -11,7 +11,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 # TODO's
-# - Add progress tracking to prevent having to re-download the entire library if there is an interruption in downloading.
+# - Add Threading
 
 import urllib
 import re
@@ -57,9 +57,6 @@ if os.path.isfile(".partial"):
 			shutil.rmtree("plugins")
 		if os.path.isfile(".revision"):
 			os.remove(".revision")
-	#elif user_input.lower() == 'yes':
-	#	if os.path.isfile(".revision"):
-	#		os.remove(".revision")
 
 #
 # DEPENDANT THINGYS
@@ -72,7 +69,6 @@ if not os.path.exists( "plugins" ):
 # 
 chnagelog_url = "http://plugins.trac.wordpress.org/log/?format=changelog&stop_rev=HEAD"
 
-#print "Fetching most recent repository revision..."
 f = urllib.urlopen( chnagelog_url )
 content = f.read()
 svn_last_revision = re.search("\[([0-9]+)\]", content)
@@ -93,7 +89,6 @@ if os.path.isfile(".revision"):
 	rev = re.search("\[([0-9]+)\]", f_text)
 	last_revision = rev.group(1)
 
-	# Only stop if the rev numbers both match
 	if int(last_revision) == int(svn_last_revision.group(1)):
 		print bcolors.OKGREEN + bcolors.BOLD + "You are up-to-date" + bcolors.ENDC + bcolors.ENDC
 		print ""
@@ -120,16 +115,10 @@ else:
 	plugins = re.findall('<li><a href="(.+)">', plugin_list)
 	total_plugin_count = len(plugins)
 
-
-
 #
 # GET THE REQUIRED PLUGIN LIST
 # 
 for x in range( start, total_plugin_count):
-
-	rev_file = open(".partial", "w+")
-	rev_file.write( str( x ) )
-	rev_file.close()
 
 	# FEEBACK
 	print "Updating " + plugins[x].rstrip("/")
@@ -150,7 +139,10 @@ for x in range( start, total_plugin_count):
 	else:
 		print bcolors.FAIL + "Update Failed for " + plugins[x].rstrip("/") +  bcolors.ENDC
 
-	# CLEANUP
+	# LOG AND CLEANUP
+	rev_file = open(".partial", "w+")
+	rev_file.write( str( x ) )
+	rev_file.close()
 	os.remove( local_zip )
 
 # UPDATE REVISION TO THE LATEST

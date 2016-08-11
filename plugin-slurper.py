@@ -19,6 +19,7 @@ import sys
 import os.path
 import zipfile
 import shutil
+import thread
 
 slurp_version = "1.0.0"
 
@@ -26,6 +27,9 @@ last_revision = False;
 plugins = False
 total_plugin_count = 0
 start = 0
+
+allowed_threads = 10
+current_thread_count = 0 
 
 class bcolors:
     HEADER = '\033[95m'
@@ -44,6 +48,58 @@ print bcolors.FAIL + "Contribute to the project at https://github.com/justingree
 print bcolors.FAIL + "Please report all bugs and issues at https://github.com/justingreerbbi/plugin-slurper/issues" + bcolors.ENDC
 print bcolors.FAIL + "" + bcolors.ENDC
 print ""
+
+# 
+# TREADING FUNCTION THAT CAN BE CALLED USING AN INDEX
+# 
+def updatePlugin( x ):
+	global current_thread_count
+	
+	# FEEBACK
+	print "Updating " + plugins[x].rstrip("/")
+ 
+	# SETUP
+	local_zip = "plugins/" + plugins[x].rstrip("/") + ".zip"
+	local_dir = "plugins"
+
+	# DOWNLAOD
+	plugin_zip_url = "http://downloads.wordpress.org/plugin/"+plugins[x].rstrip("/")+".latest-stable.zip?nostats=1"
+	urllib.urlretrieve( plugin_zip_url, local_zip )
+
+	# UNPACK
+	if zipfile.is_zipfile( local_zip ):
+		zip_ref = zipfile.ZipFile( local_zip, 'r' )
+		zip_ref.extractall( local_dir )
+		zip_ref.close()
+	else:
+		print bcolors.FAIL + "Update Failed for " + plugins[x].rstrip("/") +  bcolors.ENDC
+
+	# LOG AND CLEANUP
+	rev_file = open(".partial", "w+")
+	rev_file.write( str( x ) )
+	rev_file.close()
+	os.remove( local_zip )
+	current_thread_count-=1
+	if x == total_plugin_count:
+		complete()
+
+#
+# COMPLETE 
+# 
+def complete():
+	# UPDATE REVISION TO THE LATEST
+	rev_file = open(".revision", "w+")
+	rev_file.write( svn_last_revision.group(0) )
+	rev_file.close();
+
+	# REMOVE PARTIAL FILE
+	if os.path.isfile(".partial"):
+		os.remove(".partial")
+
+	# SCRIPT IS COMPLETE
+	print ""
+	print bcolors.BOLD + "Complete" + bcolors.ENDC
+	sys.exit()
 
 #
 # CHECK FOR PARTIAL DOWNLOAD
@@ -120,46 +176,10 @@ else:
 	plugins = re.findall('<li><a href="(.+)">', plugin_list)
 	total_plugin_count = len(plugins)
 
-#
-# GET THE REQUIRED PLUGIN LIST
-# 
-for x in range( start, total_plugin_count):
 
-	# FEEBACK
-	print "Updating " + plugins[x].rstrip("/")
- 
-	# SETUP
-	local_zip = "plugins/" + plugins[x].rstrip("/") + ".zip"
-	local_dir = "plugins"
+while start <= 200:
+	if current_thread_count < allowed_threads:
+		current_thread_count+=1
+		thread.start_new_thread( updatePlugin, (start, ) )
+		start+=1
 
-	# DOWNLAOD
-	plugin_zip_url = "http://downloads.wordpress.org/plugin/"+plugins[x].rstrip("/")+".latest-stable.zip?nostats=1"
-	urllib.urlretrieve( plugin_zip_url, local_zip )
-
-	# UNPACK
-	if zipfile.is_zipfile( local_zip ):
-		zip_ref = zipfile.ZipFile( local_zip, 'r' )
-		zip_ref.extractall( local_dir )
-		zip_ref.close()
-	else:
-		print bcolors.FAIL + "Update Failed for " + plugins[x].rstrip("/") +  bcolors.ENDC
-
-	# LOG AND CLEANUP
-	rev_file = open(".partial", "w+")
-	rev_file.write( str( x ) )
-	rev_file.close()
-	os.remove( local_zip )
-
-# UPDATE REVISION TO THE LATEST
-rev_file = open(".revision", "w+")
-rev_file.write(svn_last_revision.group(0))
-rev_file.close();
-
-# REMOVE PARTIAL FILE
-if os.path.isfile(".partial"):
-	os.remove(".partial")
-
-# SCRIPT IS COMPLETE
-print ""
-print bcolors.BOLD + "Complete" + bcolors.ENDC
-sys.exit()

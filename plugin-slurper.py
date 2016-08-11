@@ -57,6 +57,9 @@ if os.path.isfile(".partial"):
 			shutil.rmtree("plugins")
 		if os.path.isfile(".revision"):
 			os.remove(".revision")
+	#elif user_input.lower() == 'yes':
+	#	if os.path.isfile(".revision"):
+	#		os.remove(".revision")
 
 #
 # DEPENDANT THINGYS
@@ -84,6 +87,7 @@ else:
 # - CHECK IF IT MATCHED THE REMOTE
 # - IF THE REVISON DOES NOT MATCH THE REMOTE THEN GET THE DIFF IN VERSION NUMBERS
 if os.path.isfile(".revision"):
+
 	f = open(".revision")
 	f_text = f.read()
 	rev = re.search("\[([0-9]+)\]", f_text)
@@ -96,7 +100,7 @@ if os.path.isfile(".revision"):
 	else:
 		print "Local at " + bcolors.BOLD + last_revision + bcolors.ENDC + " (out-dated)"
 		print "" 
-		print "Retrieving changelog... Please wait."
+		print bcolors.BOLD + "Retrieving changelog. Please wait..." + bcolors.ENDC
 
 		svn_diff = int(svn_last_revision.group(1)) - int(last_revision)
 		svn_changelog_url = "http://plugins.trac.wordpress.org/log/?verbose=on&mode=follow_copy&format=changelog&rev="+str(svn_last_revision.group(1))+"&limit="+str(svn_diff)
@@ -104,23 +108,15 @@ if os.path.isfile(".revision"):
 		changelog_content = urllib.urlopen(svn_changelog_url)
 		changelog_content = changelog_content.read()
 		plugins = re.findall('\s*\* ([^/A-Z ]+)', changelog_content)
-
-		global plugins, total_plugin_count
 		plugins = list(set(plugins))
 		total_plugin_count = len(plugins)
 
 else:
-	rev_file = open(".revision", "w+")
-	rev_file.write(svn_last_revision.group(0))
-	rev_file.close();
-	
 	print "No local revision found. Sit tight because this could take a while."
 	print ""
 
 	plugin_url = urllib.urlopen("http://svn.wp-plugins.org");
 	plugin_list = plugin_url.read()
-
-	global plugins, total_plugin_count
 	plugins = re.findall('<li><a href="(.+)">', plugin_list)
 	total_plugin_count = len(plugins)
 
@@ -157,10 +153,16 @@ for x in range( start, total_plugin_count):
 	# CLEANUP
 	os.remove( local_zip )
 
+# UPDATE REVISION TO THE LATEST
+rev_file = open(".revision", "w+")
+rev_file.write(svn_last_revision.group(0))
+rev_file.close();
+
+# REMOVE PARTIAL FILE
 if os.path.isfile(".partial"):
 	os.remove(".partial")
 
 # SCRIPT IS COMPLETE
-print bcolors.BOLD + "Plugin Slurp Complete" + bcolors.ENDC
 print ""
+print bcolors.BOLD + "Complete" + bcolors.ENDC
 sys.exit()

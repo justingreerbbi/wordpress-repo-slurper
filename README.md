@@ -28,9 +28,11 @@ Instructions
 ------------
 
 1. `cd plugin-slurper`
-2. `python3 or python plugin-slurper.py`
+2. `./plugin-slurper.py'
 
-The `plugins/` directory will contain all the plugins, when the script is done.
+* The `plugins/` directory will contain all the plugins, when the script is done.
+* Partial download data is stored in `.partial` 
+* Local revision is stored in `.revision`
 
 FAQ
 ----

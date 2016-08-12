@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation under GPL v1
@@ -104,7 +106,9 @@ if os.path.isfile(".partial"):
 			os.remove(".revision")
 	elif user_input.lower() == 'yes':
 		partial = open(".partial", "r")
-		start = int(partial.read())
+		start = partial.read()
+		print( start )
+		sys.exit()
 
 #
 # DEPENDANT THINGYS

@@ -22,7 +22,7 @@ is a reasonable time.
 Requirements
 ------------
 
-* Python 3.x(tested with 2.7)
+* Python 3.x
 
 Instructions
 ------------

@@ -106,9 +106,11 @@ if os.path.isfile(".partial"):
 			os.remove(".revision")
 	elif user_input.lower() == 'yes':
 		partial = open(".partial", "r")
-		start = partial.read()
-		print( start )
-		sys.exit()
+		partial_content = partial.read()
+		if partial_content.strip() != "":
+			start = int( partial_content.strip() )
+		else:
+			start = 0
 
 #
 # DEPENDANT THINGYS

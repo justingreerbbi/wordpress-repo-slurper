@@ -56,7 +56,7 @@ def updatePlugin( x ):
 	global current_thread_count
 
 	# FEEBACK
-	print ("Updating " + plugins[x].decode("utf-8").rstrip("/") + " - " + str(int((x)/int(total_plugin_count))*100) + "%")
+	print ("Updating " + plugins[x].decode("utf-8").rstrip("/") )
  
 	# SETUP
 	local_zip = "plugins/" + plugins[x].decode("utf-8").rstrip("/") + ".zip"
@@ -86,26 +86,7 @@ def updatePlugin( x ):
 	rev_file.close()
 	os.remove( local_zip )
 	current_thread_count-=1
-	if x == total_plugin_count:
-		complete()
-
-#
-# COMPLETE 
-# 
-def complete():
-	# UPDATE REVISION TO THE LATEST
-	rev_file = open(".revision", "w+")
-	rev_file.write( svn_last_revision.group(0) )
-	rev_file.close();
-
-	# REMOVE PARTIAL FILE
-	if os.path.isfile(".partial"):
-		os.remove(".partial")
-
-	# SCRIPT IS COMPLETE
-	print ("")
-	print (bcolors.BOLD + "Complete" + bcolors.ENDC)
-	sys.exit()
+			
 
 #
 # CHECK FOR PARTIAL DOWNLOAD
@@ -157,17 +138,24 @@ if os.path.isfile(".revision"):
 	last_revision = rev.group(1)
 
 	if int(last_revision) == int(svn_last_revision.group(1)):
-		print (bcolors.OKGREEN + bcolors.BOLD + "You are up-to-date" + bcolors.ENDC + bcolors.ENDC)
+		print (bcolors.OKGREEN + bcolors.BOLD + "Hooray! You are up-to-date." + bcolors.ENDC + bcolors.ENDC)
 		print ("")
+		sys.exit()
 	else:
 		print ("Local at " + bcolors.BOLD + last_revision + bcolors.ENDC + " (out-dated)")
 		print ("") 
 		print (bcolors.BOLD + "Retrieving changelog. Please wait..." + bcolors.ENDC)
+		print ("")
 
-		svn_diff = int(svn_last_revision.group(1)) - int(last_revision)
-		svn_changelog_url = "http://plugins.trac.wordpress.org/log/?verbose=on&mode=follow_copy&format=changelog&rev="+str(svn_last_revision.group(1))+"&limit="+str(svn_diff)
+		svn_diff = int(svn_last_revision.group(1).decode("UTF-8")) - int(last_revision)
+		svn_changelog_url = "http://plugins.trac.wordpress.org/log/?verbose=on&mode=follow_copy&format=changelog&rev="+str(svn_last_revision.group(1).decode("UTF-8"))+"&limit="+str(svn_diff)
 
-		changelog_content = urllib.request.urlopen(svn_changelog_url)
+		try:
+			changelog_content = urllib.request.urlopen(svn_changelog_url)
+		except urllib.error.URLError as e:
+			print (bcolors.FAIL + "The changelog does not seem to be reachable. (" + e.reason + ")" + bcolors.ENDC)
+			sys.exit()
+
 		changelog_content = changelog_content.read()
 		plugins = re.findall(b'\s*\* ([^/A-Z ]+)', changelog_content)
 		plugins = list(set(plugins))
@@ -183,9 +171,25 @@ else:
 	total_plugin_count = len(plugins)
 
 
-while start <= total_plugin_count:
+while start < total_plugin_count+1:
 	if current_thread_count < allowed_threads:
 		current_thread_count+=1
 		_thread.start_new_thread( updatePlugin, (start, ) )
 		start+=1
+
+## SIMPLE TRICK TO KEEP THE SCRIPT ALIVE UNTIL ALL THE PLUGINS ARE DOWNLOADED
+while start < total_plugin_count:
+	pass
+
+rev_file = open(".revision", "w+")
+rev_file.write( svn_last_revision.group(0).decode("UTF-8") )
+rev_file.close();
+
+# REMOVE PARTIAL FILE
+if os.path.isfile(".partial"):
+	os.remove(".partial")
+
+# SCRIPT IS COMPLETE
+print ("")
+print (bcolors.BOLD + "Complete" + bcolors.ENDC)
 

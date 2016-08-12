@@ -69,6 +69,7 @@ def updatePlugin( x ):
 		urllib.request.urlretrieve( plugin_zip_url, local_zip )
 	except urllib.error.URLError as e:
 		print (bcolors.FAIL + "Update Failed for " + plugins[x].decode("utf-8").rstrip("/") +  bcolors.ENDC)
+		current_thread_count-=1
 		return
 
 	# UNPACK
@@ -77,7 +78,7 @@ def updatePlugin( x ):
 		zip_ref.extractall( local_dir )
 		zip_ref.close()
 	else:
-		print (bcolors.FAIL + "Update Failed for " + plugins[x].decode("utf-8").rstrip("/") +  bcolors.ENDC)
+		print (bcolors.FAIL + "Failed to unpack " + plugins[x].decode("utf-8").rstrip("/") +  bcolors.ENDC)
 
 	# LOG AND CLEANUP
 	rev_file = open(".partial", "w+")

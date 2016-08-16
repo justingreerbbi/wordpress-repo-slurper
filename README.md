@@ -1,16 +1,15 @@
-WordPress Plugin Slurper
+WordPress Repo Slurper
 ========================
 
 A command line Python 3.X script that downloads and updates a copy of the latest stable
-version of every plugin in the WordPress repo.
-
-This script is model after the WordPress Plugin Directory Slurper built with PHP https://github.com/markjaquith/WordPress-Plugin-Directory-Slurper
+version of every plugin and or theme in the WordPress repo.
 
 Improvements over PHP
 ---------------------
 
 * Threaded support. Downloads 10x faster than PHP
 * Partial download support for initial download
+* Support both plugins and themes in one script
 
 Common Issues
 -------------
@@ -27,12 +26,19 @@ Requirements
 Instructions
 ------------
 
-1. `cd plugin-slurper`
-2. `./plugin-slurper.py'
+1. `cd WordPress-Repo-Slurper`
+2. `./python plugin-slurper.py`
 
-* The `plugins/` directory will contain all the plugins, when the script is done.
-* Partial download data is stored in `.partial` 
-* Local revision is stored in `.revision`
+### Options ###
+
+* -r / repo 'plugins' or 'themes' - Which repo you will slurp on (defaults to plugins).
+* -t / threads - Number of threads to run on while slurping (defaults to 10).
+
+### Example ###
+
+`.wordpress-repo-slurper.py [-r/repo]=plugins|themes [-t/threads]=1-20`
+
+The `plugins/` directory will contain all the plugins, when the script is done.
 
 FAQ
 ----

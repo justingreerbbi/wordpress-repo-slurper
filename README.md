@@ -38,23 +38,18 @@ Instructions
 
 `.wordpress-repo-slurper.py [-r/repo]=plugins|themes [-t/threads]=1-20`
 
-The `plugins/` directory will contain all the plugins, when the script is done.
+The `plugins` directory will contain all the plugins
+The `themes` directory will contain all the themes
 
 FAQ
 ----
 
 ### How long will it take? ###
 
-Initial run will take between 8-16 hours. Updates over revisions take a matter of minutes if not seconds.
+* Plugins - ~4hr (@ 50mb/s)
+* Themss - ~ 28mins (@ 50mb/s)
 
 ### How much disk space do I need? ###
 
-Questionable. I will get back to you.
-
-### I don't have 18 hours straight. Can I do Partial Updates? ###
-
-The script is designed to store the last index so even if you kill the script, the script will track the last downloaded index. 
-If there is a partial update during launch of the script, the script will ask if you want to continue with the download.
-
-Things could get hairy if there is a big difference in revisions between partial downloads. This is just a theory and not tested yet.
-Feel free to test away and contribute to the project.
+* Plugins - TBD
+* Themes - ~4GB

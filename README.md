@@ -26,8 +26,8 @@ Requirements
 Instructions
 ------------
 
-1. `cd WordPress-Repo-Slurper`
-2. `./python plugin-slurper.py`
+1. `cd wordpress-repo-slurper`
+2. `./wordpress-repo-slurper.py`
 
 ### Options ###
 
@@ -36,7 +36,7 @@ Instructions
 
 ### Example ###
 
-`.wordpress-repo-slurper.py [-r/repo]=plugins|themes [-t/threads]=1-20`
+`./wordpress-repo-slurper.py [-r/repo]=plugins|themes [-t/threads]=1-20`
 
 The `plugins` directory will contain all the plugins
 The `themes` directory will contain all the themes

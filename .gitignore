@@ -1,3 +1,8 @@
 plugins
-.revision
+themes
+.revision_plugins
+.revision_themes
+.partial_plugins
+.partial_themes
 .partial
+.revision

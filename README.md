@@ -35,7 +35,7 @@ Instructions
 
 ### Example ###
 
-`./wordpress-repo-slurper.py [-r/repo]=plugins|themes [-t/threads]=1-20`
+`./wordpress-repo-slurper.py [-r/repo] plugins|themes [-t/threads] 1-20`
 
 The `plugins` directory will contain all the plugins
 The `themes` directory will contain all the themes

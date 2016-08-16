@@ -14,9 +14,8 @@ Improvements over PHP
 Common Issues
 -------------
 
-* Since the Slurper is not a true SVN client, you may be missing some plugins if you take too long to do the initial 
-download. It is possible that we can track revisions for the initial download but currently just do the initial download
-is a reasonable time.
+* Since the Slurper is not a true SVN client, you may be missing some plugins/themes if you take too long to do the initial 
+download.
 
 Requirements
 ------------

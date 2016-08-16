@@ -74,7 +74,7 @@ class bcolors:
 # SCRIPT INTRO
 #
 print ( bcolors.FAIL + "" + bcolors.ENDC )
-print ( bcolors.FAIL + bcolors.BOLD + "WordPress Plugin Slurp v." + slurp_version + bcolors.ENDC)
+print ( bcolors.FAIL + bcolors.BOLD + "WordPress Repository Slurper v." + slurp_version + bcolors.ENDC)
 print ( bcolors.FAIL + "Slurp all the plugins from the WordPress Repository" + bcolors.ENDC )
 print ( bcolors.FAIL + "Contribute to the project at https://github.com/justingreerbbi/plugin-slurper/" + bcolors.ENDC )
 print ( bcolors.FAIL + "Please report all bugs and issues at https://github.com/justingreerbbi/plugin-slurper/issues" + bcolors.ENDC )
@@ -88,7 +88,7 @@ def updatePlugin( x ):
 	global current_thread_count
 
 	# FEEBACK
-	print ("Updating " + plugins[x].decode("utf-8").rstrip("/") )
+	print ("Slurping on " + plugins[x].decode("utf-8").rstrip("/") )
  
 	# SETUP
 	local_zip = output_dir + "/" + plugins[x].decode("utf-8").rstrip("/") + ".zip"
@@ -102,7 +102,7 @@ def updatePlugin( x ):
 	try:
 		urllib.request.urlretrieve( zip_url, local_zip )
 	except urllib.error.URLError as e:
-		print (bcolors.FAIL + "Update Failed for " + plugins[x].decode("utf-8").rstrip("/") +  bcolors.ENDC)
+		print (bcolors.FAIL + "Slurp failed for " + plugins[x].decode("utf-8").rstrip("/") +  bcolors.ENDC)
 		current_thread_count-=1
 		return
 
